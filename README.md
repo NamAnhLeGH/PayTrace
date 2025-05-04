@@ -132,4 +132,4 @@ Access it at [http://localhost:5173](http://localhost:5173)
 
 ## 📖 License
 
-MIT License © 2025 Your Name
+MIT License © 2025 Nam Anh Le
