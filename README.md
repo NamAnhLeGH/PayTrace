@@ -30,8 +30,8 @@ This web app allows you to manage customers, view donation orders, generate rece
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/yourname/square-donation-receipts.git
-cd square-donation-receipts
+https://github.com/NamAnhLeGH/PayTrace.git
+cd PayTrace
 ```
 
 ### 2. Install Dependencies
@@ -73,29 +73,6 @@ cnon:card-nonce-ok
 
 ---
 
-## 📂 Folder Structure
-
-```
-.
-├── public/
-├── server/
-│   ├── routes/
-│   ├── templates/
-│   └── index.js
-├── src/
-│   ├── components/
-│   │   ├── Modal.tsx
-│   │   ├── InvoiceModal.tsx
-│   │   ├── InvoiceList.tsx
-│   │   ├── FilterModal.tsx
-│   │   └── CustomerTable.tsx
-│   ├── types.ts
-│   └── App.tsx
-└── .env
-```
-
----
-
 ## 📫 Sending Emails
 
 Receipts can be emailed to customers using Gmail's SMTP:
@@ -132,7 +109,7 @@ e.g. receipt-88QWVK8VB82NASVE6QBWMXPJNR-03May25-12May25.pdf
 npm run dev
 ```
 
-Access it at [http://localhost:3000](http://localhost:3000)
+Access it at [http://localhost:5173](http://localhost:5173)
 
 ---
 
