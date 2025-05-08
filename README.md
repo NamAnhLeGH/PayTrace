@@ -19,7 +19,8 @@ This web app allows you to manage customers, view donation orders, generate rece
 
 - **Frontend:** React + Bootstrap 5
 - **Backend:** Node.js + Express
-- **PDF/DOCX Generator:** `pdf-lib` + `docx-templates`
+- **DOCX Generator:** `docx-templates`
+- **DOCX to PDF Converter:** `docx2pdf-converter`
 - **Email Service:** Nodemailer + Gmail App Password
 - **Payment Platform:** Square API (sandbox mode)
 
