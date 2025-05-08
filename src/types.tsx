@@ -26,3 +26,10 @@ export type Order = {
   updated_at?: string;
   state?: string;
 };
+
+export type Settings = {
+  startDate?: string;
+  endDate?: string;
+  issuedBy: string;
+  note: string;
+};

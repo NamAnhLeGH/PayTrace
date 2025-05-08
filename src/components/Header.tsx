@@ -40,9 +40,9 @@ const Header = ({ title }: { title: string }) => {
                     className={({ isActive }) =>
                       "nav-link" + (isActive ? " active" : "")
                     }
-                    to="/customers"
+                    to="/search"
                   >
-                    Customers
+                    Search
                   </NavLink>
                 </li>
               </ul>

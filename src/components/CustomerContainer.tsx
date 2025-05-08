@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import Modal from "./Modal";
 import InvoiceList from "./InvoiceList";
 import ReceiptForm from "./ReceiptForm";
-import { Customer, Order } from "../types";
+import { Customer, Order, Settings } from "../types";
 
 type Props = {
-  customer: Customer | null;
-  show: boolean;
-  onClose: () => void;
+  customer: Customer;
+  settings: Settings;
 };
 
 const formatDate = (dateStr: string | null | undefined) => {
@@ -20,15 +18,12 @@ const formatDate = (dateStr: string | null | undefined) => {
   return `${formattedDay}${formattedMonth}${formattedYear}`; // e.g. "14May25"
 };
 
-
-const InvoiceModal = ({ customer, show, onClose }: Props) => {
+const CustomerContainer = ({ customer, settings }: Props) => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [issuedBy, setIssuedBy] = useState("Temple Admin");
-  const [note, setNote] = useState("Thank you!");
   const [invoices, setInvoices] = useState<string[]>([]);
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+
+  const { startDate, endDate, issuedBy, note } = settings || {}; // Destructure settings properly
 
   useEffect(() => {
     const loadData = async () => {
@@ -38,8 +33,8 @@ const InvoiceModal = ({ customer, show, onClose }: Props) => {
       const invRes = await fetch(`/api/invoices/${customer.id}`);
       setInvoices(await invRes.json());
     };
-    if (show) loadData();
-  }, [customer, show]);
+    if (customer) loadData();
+  }, [customer]);
 
   const generateReceipt = async () => {
     if (!customer) return null;
@@ -124,48 +119,17 @@ const InvoiceModal = ({ customer, show, onClose }: Props) => {
   if (!customer) return null;
 
   return (
-    <Modal show={show} onClose={onClose} title="Customer Invoices">
-      <p>
-        <strong>Name:</strong> {customer.given_name} {customer.family_name}
-      </p>
+    <>
+      <h2>
+        {customer.given_name} {customer.family_name}
+      </h2>
+
       <p>
         <strong>Email:</strong> {customer.email_address}
       </p>
       <p>
         <strong>Phone:</strong> {customer.phone_number}
       </p>
-
-      <div className="row mb-3">
-        <div className="col">
-          <label className="form-label">
-            <strong>Start Date:</strong>
-          </label>
-          <input
-            type="date"
-            className="form-control"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </div>
-        <div className="col">
-          <label className="form-label">
-            <strong>End Date:</strong>
-          </label>
-          <input
-            type="date"
-            className="form-control"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <ReceiptForm
-        issuedBy={issuedBy}
-        note={note}
-        setIssuedBy={setIssuedBy}
-        setNote={setNote}
-      />
 
       <InvoiceList
         customer={customer}
@@ -191,8 +155,10 @@ const InvoiceModal = ({ customer, show, onClose }: Props) => {
           <i className="bi bi-download"></i> PDF
         </button>
       </div>
-    </Modal>
+
+      <hr />
+    </>
   );
 };
 
-export default InvoiceModal;
+export default CustomerContainer;

@@ -57,9 +57,8 @@ const InvoiceList = ({ customer, invoices, setInvoices, issuedBy }: Props) => {
 
   return (
     <div className="mt-3">
-      <strong>Existing Invoices:</strong>
+      {invoices.length !== 0 && <strong>Existing Invoices:</strong>}
       <ul>
-        {invoices.length === 0 && <li>No receipts found.</li>}
         {invoices.map((url, i) => {
           const filename = url.split("/").pop()!;
           return (

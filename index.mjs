@@ -8,6 +8,7 @@ import fs from "fs";
 import { createReport } from "docx-templates";
 import { convert } from "docx2pdf-converter";
 import nodemailer from "nodemailer";
+import { error } from "console";
 
 dotenv.config({ path: ".env.local" });
 
@@ -21,18 +22,84 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(resolvePath("public")));
 
-app.get("/api/customers", async (req, res) => {
+app.get("/api/customers/search", async (req, res) => {
   const accessToken = process.env.SQUARE_ACCESS_TOKEN;
-  const url = "https://connect.squareupsandbox.com/v2/customers";
+  const url = "https://connect.squareupsandbox.com/v2/customers/search";
   const headers = {
     Authorization: `Bearer ${accessToken}`,
     "Square-Version": "2025-04-16",
+    "Content-Type": "application/json",
   };
 
+  console.log("Request query:", req.query);
+
+  const { first, last, email, phone, startDate, endDate, searchType } =
+    req.query;
+
+  const applySearchType = (fieldValue) => {
+    if (!fieldValue) return undefined; // Return undefined if no field value is provided
+    console.log(`Applying searchType to: ${fieldValue}`);
+
+    if (searchType === "fuzzy") {
+      return { fuzzy: fieldValue }; // Apply fuzzy search
+    }
+    return { exact: fieldValue }; // Apply exact match (no fuzzy)
+  };
+
+  // Build the query filter based on search type (exact or fuzzy)
+  const query = {
+    query: {
+      filter: {
+        email_address: applySearchType(email), // Apply fuzzy or exact to email
+        phone_number: applySearchType(phone), // Apply fuzzy or exact to phone
+      },
+    },
+  };
+
+  let allCustomers = [];
+  let cursor = null;
+
   try {
-    const response = await axios.get(url, { headers });
-    res.json(response.data.customers || []);
+    // Pagination loop to handle large result sets
+    do {
+      if (cursor) {
+        query.query.cursor = cursor;
+      }
+
+      // Make the POST request to Square's API
+      const response = await axios.post(url, query, { headers });
+
+      // Add the customers from the current page to the results
+      allCustomers = [...allCustomers, ...response.data.customers];
+      cursor = response.data.cursor; // Get the cursor for the next page
+    } while (cursor); // Keep fetching until no more pages
+
+    // Filter customers by first and last name manually if provided
+    if (first || last) {
+      allCustomers = allCustomers.filter((customer) => {
+        const givenName = customer.given_name || "";
+        const familyName = customer.family_name || "";
+
+        const firstNameMatch = first
+          ? searchType === "fuzzy"
+            ? givenName.toLowerCase().includes(first.toLowerCase()) // Fuzzy matching for first name
+            : givenName.toLowerCase() === first.toLowerCase() // Exact match for first name
+          : true;
+
+        const lastNameMatch = last
+          ? searchType === "fuzzy"
+            ? familyName.toLowerCase().includes(last.toLowerCase()) // Fuzzy matching for last name
+            : familyName.toLowerCase() === last.toLowerCase() // Exact match for last name
+          : true;
+
+        return firstNameMatch && lastNameMatch; // Ensure both match
+      });
+    }
+
+    // Return the fetched customer data
+    res.json(allCustomers || []);
   } catch (err) {
+    console.error("Error fetching customers:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -183,5 +250,5 @@ app.post("/api/send-email", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Backend running on http://localhost:${PORT}`);
 });
