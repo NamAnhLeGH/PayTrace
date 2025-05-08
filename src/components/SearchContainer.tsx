@@ -76,19 +76,10 @@ const SettingsContainer = ({
 
 // Main Search Container Component
 type Props = {
-  onSearch: (filters: {
-    first: string;
-    last: string;
-    email: string;
-    phone: string;
-    startDate?: string;
-    endDate?: string;
-    searchType: string; // Added search type
-  }) => void;
   optionalFC?: React.ReactNode; // Optional component that can be passed
 };
 
-const SearchContainer = ({ onSearch, optionalFC }: Props) => {
+const SearchContainer = ({ optionalFC }: Props) => {
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [email, setEmail] = useState("");
@@ -119,15 +110,6 @@ const SearchContainer = ({ onSearch, optionalFC }: Props) => {
     setIssuedBy("Admin"); // Reset "Issued By" to default
     setNote("Thank you for donating!"); // Reset "Note" to default
     setSelectedOption("exact"); // Reset search type to "exact"
-    onSearch({
-      first: "",
-      last: "",
-      email: "",
-      phone: "",
-      startDate: undefined,
-      endDate: undefined,
-      searchType: "exact", // Pass the default "exact" search type
-    });
   };
 
   const fetchData = async () => {
@@ -156,15 +138,6 @@ const SearchContainer = ({ onSearch, optionalFC }: Props) => {
 
   const handleSearch = () => {
     // Search filters and fetch data
-    onSearch({
-      first,
-      last,
-      email,
-      phone,
-      startDate,
-      endDate,
-      searchType: selectedOption, // Pass the selected search type
-    });
     fetchData(); // Fetch data with the current filters
   };
 

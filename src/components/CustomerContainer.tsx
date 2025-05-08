@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import InvoiceList from "./InvoiceList";
-import ReceiptForm from "./ReceiptForm";
 import { Customer, Order, Settings } from "../types";
 
 type Props = {
@@ -21,7 +20,6 @@ const formatDate = (dateStr: string | null | undefined) => {
 const CustomerContainer = ({ customer, settings }: Props) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [invoices, setInvoices] = useState<string[]>([]);
-  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
 
   const { startDate, endDate, issuedBy, note } = settings || {}; // Destructure settings properly
 
@@ -84,7 +82,6 @@ const CustomerContainer = ({ customer, settings }: Props) => {
     });
 
     const { url } = await res.json();
-    setReceiptUrl(url);
 
     // Refresh invoice list
     const invoiceRes = await fetch(`/api/invoices/${customer.id}`);
