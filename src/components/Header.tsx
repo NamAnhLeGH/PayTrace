@@ -1,6 +1,23 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom"; // Import useNavigate
+import { signOut } from "firebase/auth"; // Import Firebase signOut
+import { auth } from "../firebase/firebase"; // Import Firebase auth instance
+import { useAuth } from "../contexts/authContext"; // Assuming you have useAuth hook for authentication
+import { Button } from "react-bootstrap"; // Import Bootstrap components
 
 const Header = ({ title }: { title: string }) => {
+  const navigate = useNavigate(); // Get the navigate function from React Router
+  const { userLoggedIn } = useAuth(); // Get login status from context
+
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // Log the user out from Firebase
+      navigate("/login"); // Redirect to login page after logging out
+    } catch (error) {
+      console.error("Logout error:", error); // Handle logout error if any
+    }
+  };
+
   return (
     <>
       <header>
@@ -25,26 +42,44 @@ const Header = ({ title }: { title: string }) => {
 
             <div className="collapse navbar-collapse" id="navbarNav">
               <ul className="navbar-nav ms-auto">
-                <li className="nav-item me-4">
-                  <NavLink
-                    className={({ isActive }) =>
-                      "nav-link" + (isActive ? " active" : "")
-                    }
-                    to="/invoices"
-                  >
-                    Invoices
-                  </NavLink>
-                </li>
-                <li className="nav-item">
-                  <NavLink
-                    className={({ isActive }) =>
-                      "nav-link" + (isActive ? " active" : "")
-                    }
-                    to="/search"
-                  >
-                    Search
-                  </NavLink>
-                </li>
+                {userLoggedIn ? (
+                  <>
+                    {/* If logged in, show these options */}
+                    <li className="nav-item me-4">
+                      <NavLink
+                        className={({ isActive }) =>
+                          "nav-link" + (isActive ? " active" : "")
+                        }
+                        to="/search"
+                      >
+                        Search
+                      </NavLink>
+                    </li>
+                    <li className="nav-item">
+                      <Button
+                        variant="primary"
+                        type="button"
+                        className="w-100"
+                        onClick={handleLogout} // Handle logout when clicked
+                      >
+                        Log out
+                      </Button>
+                    </li>
+                  </>
+                ) : (
+                  <li className="nav-item">
+                    <NavLink
+                      className={({ isActive }) =>
+                        "nav-link" + (isActive ? " active" : "")
+                      }
+                      to="/login"
+                    >
+                      <Button variant="primary" type="button" className="w-100">
+                        Log in
+                      </Button>
+                    </NavLink>
+                  </li>
+                )}
               </ul>
             </div>
           </div>

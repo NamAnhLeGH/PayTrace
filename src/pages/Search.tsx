@@ -1,6 +1,6 @@
 import SearchContainer from "../components/SearchContainer";
 
-const Customers = () => {
+const Search = () => {
   return (
     <div className="container mt-5 pt-5">
       <SearchContainer optionalFC={<h1>Search</h1>} />
@@ -8,4 +8,4 @@ const Customers = () => {
   );
 };
 
-export default Customers;
+export default Search;
