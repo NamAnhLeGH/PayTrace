@@ -32,4 +32,6 @@ export type Settings = {
   endDate?: string;
   issuedBy: string;
   note: string;
+  selectedEmailOption: string;
+  customEmail?: string;
 };

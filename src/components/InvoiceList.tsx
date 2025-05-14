@@ -5,9 +5,18 @@ type Props = {
   invoices: string[];
   setInvoices: React.Dispatch<React.SetStateAction<string[]>>;
   issuedBy: string;
+  emailOption: string;
+  customEmail?: string;
 };
 
-const InvoiceList = ({ customer, invoices, setInvoices, issuedBy }: Props) => {
+const InvoiceList = ({
+  customer,
+  invoices,
+  setInvoices,
+  issuedBy,
+  emailOption,
+  customEmail,
+}: Props) => {
   const handleDelete = async (filename: string) => {
     const base = filename.replace(/\.(docx|pdf)$/, "");
     await fetch(`/api/invoices/${base}`, { method: "DELETE" });
@@ -24,13 +33,24 @@ const InvoiceList = ({ customer, invoices, setInvoices, issuedBy }: Props) => {
   };
 
   const handleSendEmail = async (filename: string) => {
+    let toEmails = customer.email_address; // Default to customer email
+
+    // Adjust toEmails based on the selected email option
+    if (emailOption === "customer") {
+      toEmails = customer.email_address; // Send to customer only
+    } else if (emailOption === "custom") {
+      toEmails = customEmail; // Send to custom email
+    } else if (emailOption === "cc") {
+      toEmails = `${customer.email_address}, ${customEmail}`; // Send to both
+    }
+
     try {
       const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           from: issuedBy,
-          to: customer.email_address,
+          to: toEmails, // Use the correct recipient based on the selected option
           subject: "Your Donation Receipt",
           text: "Attached is your donation receipt.",
           html: "<p>Thank you for your donation!</p>",

@@ -15,6 +15,14 @@ dotenv.config({ path: ".env.local" });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let SQUARE_API_ENDPOINT;
+
+if (process.env.NODE_ENV === "development") {
+  SQUARE_API_ENDPOINT = "https://connect.squareupsandbox.com";
+} else {
+  SQUARE_API_ENDPOINT = "https://connect.squareup.com";
+}
+
 const resolvePath = (...segments) => path.join(__dirname, ...segments);
 
 const app = express();
@@ -24,7 +32,7 @@ app.use(express.static(resolvePath("public")));
 
 app.get("/api/customers/search", async (req, res) => {
   const accessToken = process.env.SQUARE_ACCESS_TOKEN;
-  const url = "https://connect.squareupsandbox.com/v2/customers/search";
+  const url = `${SQUARE_API_ENDPOINT}/v2/customers/search`;
   const headers = {
     Authorization: `Bearer ${accessToken}`,
     "Square-Version": "2025-04-16",
@@ -110,7 +118,7 @@ app.get("/api/orders", async (req, res) => {
 
   try {
     const response = await axios.post(
-      "https://connect.squareupsandbox.com/v2/orders/search",
+      `${SQUARE_API_ENDPOINT}/v2/orders/search`,
       {
         location_ids: [process.env.SQUARE_LOCATION_ID],
         query: {

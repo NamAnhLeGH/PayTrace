@@ -21,7 +21,7 @@ const CustomerContainer = ({ customer, settings }: Props) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [invoices, setInvoices] = useState<string[]>([]);
 
-  const { startDate, endDate, issuedBy, note } = settings || {}; // Destructure settings properly
+  const { startDate, endDate, issuedBy, note, selectedEmailOption, customEmail } = settings || {}; // Destructure settings properly
 
   useEffect(() => {
     const loadData = async () => {
@@ -133,6 +133,8 @@ const CustomerContainer = ({ customer, settings }: Props) => {
         invoices={invoices}
         setInvoices={setInvoices}
         issuedBy={issuedBy}
+        emailOption={selectedEmailOption}
+        customEmail={customEmail}
       />
 
       <div className="d-flex justify-content-end gap-2">
