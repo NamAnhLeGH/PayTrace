@@ -44,7 +44,7 @@ npm install
 
 ### 3. Setup Environment Variables
 
-Create a `.env` file at the root with the following:
+Create a `.env.local` file at the root with the following:
 
 ```env
 PORT=3000
