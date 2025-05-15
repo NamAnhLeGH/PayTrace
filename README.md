@@ -117,7 +117,7 @@ POST /api/send-email
 
 6. Replace that snippet with the one found in:
 ```bash
-👉 src/firebase/firebase.ts
+src/firebase/firebase.ts
 ```
 
 ---
