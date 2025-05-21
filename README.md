@@ -7,10 +7,10 @@ This web app allows you to manage customers, view donation orders, generate rece
 ## 📦 Features
 
 - 🔐 Secure customer data management
-- 🧾 Generate donation receipts with customizable date ranges and notes
+- 🧾 Generate donation receipts with customizable date ranges and advanced settings
 - 📄 Export receipts as **PDF** or **DOCX**
 - 📤 Send receipts via **Gmail** (app password required)
-- 📅 Filter customers using Bootstrap modal
+- 📅 Search customers using name, email and phone number
 - 📊 View all past invoices, download or delete them
 
 ---
@@ -23,6 +23,7 @@ This web app allows you to manage customers, view donation orders, generate rece
 - **DOCX to PDF Converter:** `docx2pdf-converter`
 - **Email Service:** Nodemailer + Gmail App Password
 - **Payment Platform:** Square API (sandbox mode)
+- **Authentication:** Firebase
 
 ---
 
@@ -43,22 +44,27 @@ npm install
 
 ### 3. Setup Environment Variables
 
-Create a `.env` file at the root with the following:
+Create a `.env.local` file at the root with the following:
 
 ```env
 PORT=3000
 
 # Square
-SQUARE_ACCESS_TOKEN=YOUR_SANDBOX_ACCESS_TOKEN
+SQUARE_ACCESS_TOKEN=YOUR_ACCESS_TOKEN
 SQUARE_LOCATION_ID=YOUR_LOCATION_ID
 SQUARE_APPLICATION_ID=YOUR_SANDBOX_APP_ID
 
 # Gmail for Nodemailer
 GMAIL_USER=your-email@gmail.com
 GMAIL_APP_PASS=your-16-char-app-password
+
+NODE_ENV=development
+# NODE_ENV=production
 ```
 
 To get a Gmail app password: [Generate App Password](https://myaccount.google.com/apppasswords)
+Note: Switch to production by uncommenting NODE_ENV=production and commenting out NODE_ENV=development for API endpoint update.
+
 
 ---
 
@@ -93,6 +99,29 @@ POST /api/send-email
 
 ---
 
+## 🔐 Firebase Authentication Setup
+
+1. Go to [**Firebase Console**](https://console.firebase.google.com/).
+2. Select your project (e.g., **`paytrace-34004`**).
+3. Click the ⚙️ **Settings** icon (top left of the sidebar) and choose **Project settings**.
+4. Scroll down to the **"Your apps"** section.
+5. If you've already registered a web app, you'll see a config snippet like this:
+
+   ```js
+   const firebaseConfig = {
+     apiKey: "...",
+     authDomain: "...",
+     // etc.
+   };
+
+
+6. Replace that snippet with the one found in:
+```bash
+src/firebase/firebase.ts
+```
+
+---
+
 ## 📄 Example Receipt Format
 
 Receipts are named like:
@@ -119,15 +148,6 @@ Access it at [http://localhost:5173](http://localhost:5173)
 - Do **NOT** hardcode tokens in source code.
 - Use `.env` and keep it out of version control.
 - Consider deploying behind HTTPS in production.
-
----
-
-## 🧠 Future Enhancements
-
-- Add Twilio or WhatsApp API for sending receipts via SMS or chat
-- Stripe support (alternative to Square)
-- Admin login with role-based access
-- Export receipts in bulk (zip)
 
 ---
 
