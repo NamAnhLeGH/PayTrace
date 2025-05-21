@@ -149,6 +149,7 @@ app.post("/api/generate-donation-receipt", async (req, res) => {
     fs.writeFileSync(docxPath, report);
 
     // Absolute path for soffice command to avoid 127 errors
+    console.log(process.platform)
     const soffice =
       process.platform === "win32"
         ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
