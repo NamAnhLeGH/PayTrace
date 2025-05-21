@@ -6,22 +6,18 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fs from "fs";
 import { createReport } from "docx-templates";
-import { convert } from "docx2pdf-converter";
+import { execSync } from "child_process";
 import nodemailer from "nodemailer";
-import { error } from "console";
 
 dotenv.config({ path: ".env.local" });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-let SQUARE_API_ENDPOINT;
-
-if (process.env.NODE_ENV === "development") {
-  SQUARE_API_ENDPOINT = "https://connect.squareupsandbox.com";
-} else {
-  SQUARE_API_ENDPOINT = "https://connect.squareup.com";
-}
+let SQUARE_API_ENDPOINT =
+  process.env.NODE_ENV === "development"
+    ? "https://connect.squareupsandbox.com"
+    : "https://connect.squareup.com";
 
 const resolvePath = (...segments) => path.join(__dirname, ...segments);
 
@@ -39,27 +35,20 @@ app.get("/api/customers/search", async (req, res) => {
     "Content-Type": "application/json",
   };
 
-  console.log("Request query:", req.query);
-
-  const { first, last, email, phone, startDate, endDate, searchType } =
-    req.query;
+  const { first, last, email, phone, searchType } = req.query;
 
   const applySearchType = (fieldValue) => {
-    if (!fieldValue) return undefined; // Return undefined if no field value is provided
-    console.log(`Applying searchType to: ${fieldValue}`);
-
-    if (searchType === "fuzzy") {
-      return { fuzzy: fieldValue }; // Apply fuzzy search
-    }
-    return { exact: fieldValue }; // Apply exact match (no fuzzy)
+    if (!fieldValue) return undefined;
+    return searchType === "fuzzy"
+      ? { fuzzy: fieldValue }
+      : { exact: fieldValue };
   };
 
-  // Build the query filter based on search type (exact or fuzzy)
   const query = {
     query: {
       filter: {
-        email_address: applySearchType(email), // Apply fuzzy or exact to email
-        phone_number: applySearchType(phone), // Apply fuzzy or exact to phone
+        email_address: applySearchType(email),
+        phone_number: applySearchType(phone),
       },
     },
   };
@@ -68,21 +57,14 @@ app.get("/api/customers/search", async (req, res) => {
   let cursor = null;
 
   try {
-    // Pagination loop to handle large result sets
     do {
-      if (cursor) {
-        query.query.cursor = cursor;
-      }
+      if (cursor) query.query.cursor = cursor;
 
-      // Make the POST request to Square's API
       const response = await axios.post(url, query, { headers });
+      allCustomers = [...allCustomers, ...(response.data.customers || [])];
+      cursor = response.data.cursor;
+    } while (cursor);
 
-      // Add the customers from the current page to the results
-      allCustomers = [...allCustomers, ...response.data.customers];
-      cursor = response.data.cursor; // Get the cursor for the next page
-    } while (cursor); // Keep fetching until no more pages
-
-    // Filter customers by first and last name manually if provided
     if (first || last) {
       allCustomers = allCustomers.filter((customer) => {
         const givenName = customer.given_name || "";
@@ -90,21 +72,20 @@ app.get("/api/customers/search", async (req, res) => {
 
         const firstNameMatch = first
           ? searchType === "fuzzy"
-            ? givenName.toLowerCase().includes(first.toLowerCase()) // Fuzzy matching for first name
-            : givenName.toLowerCase() === first.toLowerCase() // Exact match for first name
+            ? givenName.toLowerCase().includes(first.toLowerCase())
+            : givenName.toLowerCase() === first.toLowerCase()
           : true;
 
         const lastNameMatch = last
           ? searchType === "fuzzy"
-            ? familyName.toLowerCase().includes(last.toLowerCase()) // Fuzzy matching for last name
-            : familyName.toLowerCase() === last.toLowerCase() // Exact match for last name
+            ? familyName.toLowerCase().includes(last.toLowerCase())
+            : familyName.toLowerCase() === last.toLowerCase()
           : true;
 
-        return firstNameMatch && lastNameMatch; // Ensure both match
+        return firstNameMatch && lastNameMatch;
       });
     }
 
-    // Return the fetched customer data
     res.json(allCustomers || []);
   } catch (err) {
     console.error("Error fetching customers:", err);
@@ -152,7 +133,6 @@ app.post("/api/generate-donation-receipt", async (req, res) => {
       return res.json({ url: `/tmp/${baseFilename}.pdf` });
     }
 
-    // Otherwise generate it
     const templatePath = resolvePath(
       "public",
       "templates",
@@ -167,7 +147,19 @@ app.post("/api/generate-donation-receipt", async (req, res) => {
     });
 
     fs.writeFileSync(docxPath, report);
-    convert(docxPath, pdfPath);
+
+    // Absolute path for soffice command to avoid 127 errors
+    const soffice =
+      process.platform === "win32"
+        ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
+        : `"/Applications/LibreOffice.app/Contents/MacOS/soffice"`;
+
+    execSync(
+      `${soffice} --headless --convert-to pdf --outdir "${path.dirname(
+        pdfPath
+      )}" "${docxPath}"`,
+      { stdio: "ignore" }
+    );
 
     res.json({ url: `/tmp/${baseFilename}.pdf` });
   } catch (err) {
@@ -221,7 +213,6 @@ app.delete("/api/invoices/:base", (req, res) => {
 
 app.post("/api/send-email", async (req, res) => {
   const { from, to, subject, text, html, attachmentUrl } = req.body;
-  console.log(attachmentUrl);
 
   try {
     const transporter = nodemailer.createTransport({
@@ -241,7 +232,7 @@ app.post("/api/send-email", async (req, res) => {
       attachments: [
         {
           filename: "receipt.pdf",
-          path: attachmentUrl, // can be a local path or a URL
+          path: attachmentUrl,
           contentType: "application/pdf",
         },
       ],
