@@ -150,10 +150,19 @@ app.post("/api/generate-donation-receipt", async (req, res) => {
 
     // Absolute path for soffice command to avoid 127 errors
     console.log(process.platform)
-    const soffice =
-      process.platform === "win32"
-        ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
-        : `"/Applications/LibreOffice.app/Contents/MacOS/soffice"`;
+    const getLibreOfficePath = () => {
+      if (process.platform === "win32") {
+        return `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`; // Might need to confirm install path
+      } else {
+        try {
+          return execSync("which libreoffice").toString().trim(); // Linux (and sometimes macOS via brew)
+        } catch (e) {
+          throw new Error("LibreOffice is not installed or not in PATH");
+        }
+      }
+    };
+
+    const soffice = getLibreOfficePath();
 
     execSync(
       `${soffice} --headless --convert-to pdf --outdir "${path.dirname(
