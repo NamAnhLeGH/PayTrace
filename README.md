@@ -20,7 +20,7 @@ This web app allows you to manage customers, view donation orders, generate rece
 - **Frontend:** React + Bootstrap 5
 - **Backend:** Node.js + Express
 - **DOCX Generator:** `docx-templates`
-- **DOCX to PDF Converter:** `docx2pdf-converter`
+- **DOCX to PDF Converter:** `LibreOffice`
 - **Email Service:** Nodemailer + Gmail App Password
 - **Payment Platform:** Square API (sandbox mode)
 - **Authentication:** Firebase
@@ -60,11 +60,17 @@ GMAIL_APP_PASS=your-16-char-app-password
 
 NODE_ENV=development
 # NODE_ENV=production
+# Switch to production by uncommenting NODE_ENV=production and commenting out NODE_ENV=development for API endpoint update.
 ```
 
 To get a Gmail app password: [Generate App Password](https://myaccount.google.com/apppasswords)
-Note: Switch to production by uncommenting NODE_ENV=production and commenting out NODE_ENV=development for API endpoint update.
 
+---
+
+### 4. Download LibreOffice
+🌐 Download from: https://www.libreoffice.org/download/download-libreoffice/
+
+Install it using all the default options.
 
 ---
 
